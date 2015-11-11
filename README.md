@@ -8,15 +8,21 @@ The code has been optimised and mainly used for the study of the initial stages 
 
 The webpage for the code can be found at http://www.star.uclan.ac.uk/~dstamatellos/Phaethon
 
-<b> Download </b>
+<b> Downloads and updates </b>
 
 You can download the code by typing in a terminal:
  ```
  git clone https://github.com/distamio/phaethon.git
  
  cd phaethon
-  ```
-  
+ ```
+
+To update the code type in the phaethon directory:
+```
+ git pull https://github.com/distamio/phaethon.git
+
+```
+
 For more details on what git is and how it works, check out  the github help page https://help.github.com/articles/set-up-git/
 
 <b> Userguide </b>
