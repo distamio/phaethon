@@ -1,0 +1,52 @@
+# plots opacity vs lambda 
+plot   # file name
+
+ TICKSIZE   -1 0 -1 0
+ limits -1 5.4  -4 5.7
+ 
+ lweight 1
+ expand 1.1
+ location  4000 31000 3000 30000
+  box
+
+ data opacity.dat 
+ lines 1 100001
+
+ read  lambda  1
+ read  absorption 2
+ read  scattering 3
+
+ ltype 0
+ connect (lg(lambda)) (lg((absorption)))
+
+ ltype 2
+ connect (lg(lambda)) (lg((scattering)))
+
+ data opacity.dat_MRN_draine03
+ lines 1 100001
+
+ read  lambda  1
+ read  absorption 2
+ read  scattering 3
+
+ ctype red
+ ltype 0
+ connect (lg(lambda)) (lg((absorption)))
+
+ ltype 2
+ connect (lg(lambda)) (lg((scattering)))
+
+ ctype 0
+ ltype 0
+ xlabel  \lambda (\mu m)
+ ylabel Opacity (cm^{2} g^{-1})
+
+ set lglambda =0,60,0.1
+ set lgopacity=0,60,0.1
+
+ do i=0,600 {set lglambda[$i]=-1.0+$i*((5-(-1))/600.0)}
+ do i=0,600 {set lgopacity[$i]=lg(0.1)+(2*(lg(300.0)-lglambda[$i]))}
+
+ connect lglambda lgopacity
+
+

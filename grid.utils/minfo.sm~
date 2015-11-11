@@ -1,0 +1,148 @@
+
+plot 3        #1.directory name 2. colour 3. photon id 
+ expand 1.001
+
+ define r1 3 
+ define r2 6 
+
+ define AU 1.496e13
+
+ data   $1"/"outcells.dat 
+ 
+ lines  2  500 
+ read x      1
+ read y      2
+ read z      3
+ read temp   7 
+ read dens   8
+
+#### spectrum   ####################################
+
+ data $1"/"sed$3.0.0.dat
+ lines 2 10001
+
+ read  lambda   1 
+ read  luml     2
+ read  npackets 3
+
+ TICKSIZE  -1 0 -1 0
+ location  4000 16000 3000 18000 
+
+ limits -0.5 3.8   -14 -8
+
+ box
+ 
+ ptype 4 3
+ ctype $2
+ ltype 0
+ connect (lg(lambda)) (lg(luml))
+ ctype 0
+ draw_yline 0 1 (lg(250)) 0
+ xlabel \lambda (\mu m)
+ ylabel \lambda F_{\lambda} (erg s^{-1} cm^{-2})
+
+
+##### temp profile #################################
+
+ location   20000 30000 21000 32000
+
+
+
+  TICKSIZE  -1 0 0 0  
+  limits     $r1 $r2 5 17
+
+  box
+  ctype $2
+  connect (lg(x/$AU)) temp      # temperature
+  ctype 0
+
+ xlabel r (AU)   
+ ylabel Temperature (K) 
+
+
+  expand 1.001
+
+
+##### line profiles  ####################################
+
+
+ TICKSIZE  -1 0  0 0
+ location 20000 30000 3000 18000 
+ limits   $r1 $r2  0 250 
+ box  
+
+
+ notation -3 3 -3 3
+
+# data $4"/"radial.$5.4.0.0.63.dat 
+# lines 0 128
+# read  pixel     1
+# read  intensity 2  
+# connect (lg(abs(pixel-64)*1.2*206265/64.)) ((intensity))
+ 
+# data $4"/"radial.5.4.0.0.63.dat 
+# lines 0 128
+# read  pixel     1
+# read  intensity 2  
+# connect (lg(abs(pixel-64)*1.2*206265/64.)) ((intensity))
+
+
+# data $4/radial.3.4.0.0.63.dat 
+# lines 0 128
+# read  pixel     1
+# read  intensity 2  
+# connect (lg(abs(pixel-64)*1.2*206265/64.)) ((intensity))
+# ctype 0
+
+ ctype $2 
+ 
+ data $1"/"isodata.7.$3.dat
+ lines 2 10001
+
+ read  b         1
+ read  intensity 2
+ 
+ ltype 0
+ connect (lg(b/$AU)) ((intensity))
+
+ data $1"/"isodata.5.$3.dat 
+ lines 2 10001
+
+ read  b         1
+ read  intensity 2
+
+ ltype 2
+ connect (lg(b/$AU)) ((intensity))
+ 
+ ltype 0
+
+ data $1"/"isodata.3.$3.dat
+ lines 2 10001
+
+ read  b         1
+ read  intensity 2
+ 
+ ltype 0
+ connect (lg(b/$AU)) ((intensity))
+
+ ctype 0
+
+
+ xlabel b (AU)
+ ylabel I_{\gr n} (MJy/sr)
+
+ #### density profile #################################
+
+ TICKSIZE  -1 0 -1 0 
+ location  4000 16000 21000 32000
+ limits   $r1 $r2 2.5 6.2  
+ box
+
+ ctype $2
+ connect  (lg(x/$AU)) (lg(dens/(2.3*1.673e-24)))          # density 
+ ctype  0 
+ ylabel n (cm^{-3})
+ xlabel r (AU)
+
+ ctype 0
+ 

@@ -1,0 +1,88 @@
+#plot ../mod8/ 4 2 64 green 3 0
+
+#plot ../iso9999/ 7 0 60 green 4 0
+# plots perpendicular radial profiles at a specific x-pixel 
+
+plot 7        # (directory name,lambda,id,row,ltype,l,m) 
+ expand 1.001
+
+ define xmax (20000/140.)  # from iso files
+
+ notation -3 3 -3 3
+ 
+ expand 1.5
+ ctype 0
+ TICKSIZE  0 0 0 0 
+ location  5500 31000 5000 31000 
+ limits   -200 200  0 160
+ box
+ xlabel distance from peak ('')
+ ylabel I_{\gr n} (MJy sr^{-1})
+
+ define plus ($4+1)
+ define minus ($4-1)
+
+ ltype 0
+ data $1/radial.$2.$3.$6.$7.$4.dat 
+ lines 1 128
+ read  pixel     1
+ read  intensity 2 
+ data $1/radial.$2.$3.$6.$7.$plus.dat 
+ lines 1 128
+ read  intensity2 2
+ data $1/radial.$2.$3.$6.$7.$minus.dat 
+ lines 1 128
+ read  intensity3 2
+
+ set wintensity=0,127
+ set wintensity2=0,127
+ set wintensity3=0,127
+
+ do i=2,126 {set wintensity[$i]=(intensity[$i]+intensity[$i-1]+intensity[$i+1])/3.}
+ do i=2,126 {set wintensity2[$i]=(intensity2[$i]+intensity2[$i-1]+intensity2[$i+1])/3.}
+ do i=2,126 {set wintensity3[$i]=(intensity3[$i]+intensity3[$i-1]+intensity3[$i+1])/3.}
+
+ set wintensity[0]=wintensity[2]
+ set wintensity[1]=wintensity[2]
+ set wintensity2[0]=wintensity2[2]
+ set wintensity2[1]=wintensity2[2]
+ set wintensity3[0]=wintensity3[2]
+ set wintensity3[1]=wintensity3[2]
+
+
+ ctype $5
+ connect (-$xmax+pixel*(2*$xmax)/128) ((wintensity+wintensity2+wintensity3)/3.)
+
+ ctype 0
+
+ data L1521F.160.dat
+ lines 3 100
+ read pixi 1
+ read flux 2
+
+ define factor (210/2./47.85)
+ connect ($factor*pixi) (flux+68.28)
+ connect (-$factor*pixi) (flux+68.28)
+
+define a ($xmax*(37-25)/25) 
+define b  ($xmax*(42-25)/25)
+ 
+ expand 1.8 
+ ctype red 
+ draw_xline $a $b 120 4
+ relocate ($xmax*(43-24.5)/25) 120
+ label 0^o
+
+ 
+expand 1.3
+ ctype 0
+ label HERSCHEL/SPIRE
+ label HERSCHEL/PACS
+ label ISO/ISOPHOT
+ draw_arrow 0.5e4 20 2e4 20
+ draw_arrow -0.5e4 20 -2e4 20
+ relocate  -0.5e4 19 
+ label core
+ expand 1.0
+
+ 

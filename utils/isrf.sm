@@ -1,0 +1,27 @@
+# plots zucconi spectrum  
+
+plot  1
+
+ lweight 5
+ expand 1.8 
+ TICKSIZE  -1 0 -1 0
+ location  7000 30000 7000 30000
+
+ limits -1 4 -3.5 -1 
+ 
+ box
+
+ data "../"$1"/isrf.dat"
+ lines 3 10000 
+
+ read  lambda   1 
+ read  intensity     2 
+ ctype 0
+ ltype 0
+ ptype 4 3
+ connect (lg(lambda)) (lg(17*intensity*3.e10/(lambda*1.e-4)))
+ ptype 3 3
+ xlabel  {\gr l} ({\gr m}m)
+ ylabel {\gr l} I_{\gr l} (erg s^{-1} cm^{-2} sr^{-1})
+
+

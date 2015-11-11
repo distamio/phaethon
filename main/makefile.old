@@ -1,0 +1,149 @@
+##############################################################################
+# MAKEFILE: compile and link treecode executable files                       #
+# Copyright (c) 2001 by Joshua E. Barnes, Honolulu, Hawai`i.                 #
+##############################################################################
+
+########################################################################
+# DIRECTIONS: to tune this Makefile to your system, edit the definitions
+# of CCFLAGS, LDFLAGS, OPTFLAG, and PREC below.  Suggested values
+# are provided for LINUX, Sun, and SGI systems.
+
+########################################################################
+# Compiler options.
+
+# LINUX:
+MPCC=gcc -openmp #gcc # -openmp 
+#MPCC=omcc # setenv OMPC_NUM_PROCS 4
+CC=gcc  
+CCFLAGS =-DLINUX   
+#OPTFLAG = -O3 
+#STFLAG =-static 
+#PROFFLAG= -s  -O9 -finline-functions -funroll-loops  -mcpu=pentium #0.33
+#PROFFLAG=-s  -O9 -finline-functions -funroll-loops  -mcpu=pentium #0.33
+#PROFFLAG=-march=pentium4 -O3 -pipe  #2nd BEST 0.28
+#odysseus PROFFLAG=-g -march=pentium4 -O3 -ffast-math -malign-double -msse2 -mmmx  #0.20
+#PROFFLAG=-march=pentium4 -O3 -msse2 -mfpmath=sse,387 -mmmx #0.28
+#PROFFLAG=-march=pentium4 -O3 -ffast-math -mfpmath=sse,387 -mmmx #0.23
+PROFFLAG=-O3 -ffast-math  -msse2 -mmmx   #0.20
+
+# Sun:
+# CCFLAGS =
+# LDFLAGS = 
+# OPTFLAG = -xO3
+
+# SGI: 
+# CCFLAGS = -n32
+# LDFLAGS = -n32
+# OPTFLAG = -O4
+
+########################################################################
+# Precision.  Possible values are SINGLEPREC, MIXEDPREC, and DOUBLEPREC.
+
+PREC = SINGLEPREC
+
+########################################################################
+# Variations:
+
+# Uncomment the next line to use freq instead of dtime:
+# USEFREQ = -DUSEFREQ
+
+# Uncomment the next line to use binary I/O:
+# BINARYIO = -DBINARYIO
+
+########################################################################
+
+mgrid.o:../grid/mgrid.c  phaethon.h ../grid/grid.functions.h ../grid/params.grid.h 
+	$(CC)   $(STFLAG) $(PROFFLAG)   -c  ../grid/mgrid.c
+
+grid.params.o: ../grid/grid.params.c ../main/phaethon.params.h ../grid/grid.functions.h ../grid/params.grid.h
+	 $(CC)   $(STFLAG) $(PROFFLAG)   -c  ../grid/grid.params.c
+
+params.o: params.c params.h phaethon.params.h ../grid/params.grid.h 
+	$(CC)   $(STFLAG) $(PROFFLAG)   -c  params.c
+
+spec.o :spec.c phaethon.params.h params.h  ../grid/params.grid.h ../opacity/params.opa.h structs.h phaethon.functions.h spec.functions.h
+	$(CC)   $(STFLAG) $(PROFFLAG)   -c  spec.c  
+
+interactions.o :interactions.c phaethon.params.h params.h ../grid/params.grid.h ../opacity/params.opa.h structs.h phaethon.functions.h interactions.h
+	$(CC)   $(STFLAG) $(PROFFLAG)   -c  interactions.c 
+
+diagnostics.o :diagnostics.c phaethon.params.h params.h structs.h phaethon.functions.h interactions.h diagnostics.h
+	$(CC)   $(STFLAG) $(PROFFLAG)   -c  diagnostics.c
+
+bb.o :bb.c 
+	$(CC)   $(STFLAG) $(PROFFLAG)   -c bb.c
+
+photons.o :photons.c  phaethon.params.h params.h ../grid/params.grid.h ../opacity/params.opa.h structs.h phaethon.functions.h photons.h
+	$(CC)   $(STFLAG) $(PROFFLAG)   -c photons.c 
+  
+find_cell.o : ../grid/find_cell.c phaethon.params.h params.h ../grid/params.grid.h structs.h treedefs.h phaethon.functions.h treecode.h treedefs.h
+	$(CC)   $(STFLAG) $(PROFFLAG)   -c ../grid/find_cell.c 
+
+opacity.o: opacity.c phaethon.params.h params.h ../grid/params.grid.h structs.h treedefs.h phaethon.functions.h treecode.h treedefs.h
+	$(CC)   $(STFLAG) $(PROFFLAG)   -c opacity.c 
+
+advance.o : ../grid/advance.c  phaethon.params.h params.h ../grid/params.grid.h ../opacity/params.opa.h structs.h phaethon.functions.h
+	$(CC)   $(STFLAG) $(PROFFLAG)   -c  ../grid/advance.c 
+
+dens.o : ../grid/dens.c  phaethon.params.h params.h ../grid/params.grid.h ../opacity/params.opa.h structs.h phaethon.functions.h
+	$(CC)   $(STFLAG) $(PROFFLAG)   -c  ../grid/dens.c 
+
+star.o : star.c  phaethon.params.h params.h ../grid/params.grid.h ../opacity/params.opa.h structs.h phaethon.functions.h
+	$(CC)   $(STFLAG) $(PROFFLAG)   -c  star.c
+
+inout.o :inout.c   phaethon.params.h params.h ../grid/params.grid.h ../opacity/params.opa.h structs.h phaethon.functions.h interactions.h 
+	$(CC)   $(STFLAG) $(PROFFLAG)   -c  inout.c
+
+makecells.o : makecells.c treecode.h treedefs.h structs.h  phaethon.params.h params.h
+	$(CC)   $(STFLAG) $(PROFFLAG)   -D$(PREC) $(USEFREQ) $(BINARYIO) -c makecells.c
+
+treeio.o : treeio.c treecode.h treedefs.h
+	$(CC) $(CCFLAGS) $(PROFFLAG) $(STFLAG)  -D$(PREC) $(USEFREQ) $(BINARYIO) -c treeio.c
+
+treeload.o: treeload.c treedefs.h phaethon.params.h params.h ../grid/params.grid.h
+	$(CC) $(CCFLAGS) $(PROFFLAG) $(STFLAG)  -D$(PREC) -c treeload.c
+
+treegrav.o: treegrav.c treedefs.h
+	$(CC) $(CCFLAGS) $(PROFFLAG) $(STFLAG) -D$(PREC) $(OPTFLAG) -c treegrav.c
+
+mathfns.o: mathfns.c stdinc.h mathfns.h
+	$(CC) $(CCFLAGS) -D$(PREC) $(STFLAG )$(PROFFLAG)  -c mathfns.c
+
+clib.o: clib.c stdinc.h
+	$(CC) $(CCFLAGS) -D$(PREC) $(STFLAG) $(PROFFLAG)  -c  clib.c 
+
+getparam.o: getparam.c stdinc.h getparam.h
+	$(CC) $(CCFLAGS) -D$(PREC) $(STFLAG) $(PROFFLAG) -c getparam.c 
+
+phaethon:  phaethon.c  mgrid.o params.o grid.params.o spec.o interactions.o diagnostics.o  bb.o photons.o find_cell.o  opacity.o \
+ 	advance.o star.o dens.o inout.o treeio.o  makecells.o treeload.o treegrav.o  clib.o getparam.o mathfns.o
+	$(MPCC) $(PROFFLAG) $(PARALLEL) -o phaethon  grid.params.o mgrid.o spec.o interactions.o diagnostics.o bb.o photons.o \
+	find_cell.o star.o opacity.o  params.o advance.o dens.o inout.o treeio.o  makecells.o treeload.o treegrav.o \
+	mathfns.o clib.o getparam.o  phaethon.c -lm 
+
+postrt.o :postrt.c  treecode.h treedefs.h phaethon.params.h params.h ../grid/params.grid.h ../opacity/params.opa.h structs.h \
+	interactions.h diagnostics.h spec.functions.h phaethon.h stdinc.h getparam.h
+	$(MPCC) $(PROFFLAG)  $(STFLAG) $(PARALLEL) -c postrt.c  
+
+postrt:  postrt.o spec.o interactions.o diagnostics.o  bb.o photons.o find_cell.o  opacity.o \
+ 	advance.o star.o dens.o inout.o treeio.o  makecells.o treeload.o treegrav.o  clib.o getparam.o mathfns.o
+	$(MPCC) $(PROFFLAG) $(PARALLEL) -o postrt postrt.o spec.o interactions.o diagnostics.o bb.o photons.o \
+	find_cell.o star.o opacity.o  advance.o dens.o inout.o treeio.o  makecells.o treeload.o treegrav.o \
+	mathfns.o clib.o getparam.o -lm  
+
+phaebb.o :phaebb.c  treecode.h treedefs.h phaethon.params.h params.h ../grid/params.grid.h ../opacity/params.opa.h structs.h \
+	interactions.h diagnostics.h spec.functions.h phaethon.h stdinc.h getparam.h
+	$(MPCC) $(PROFFLAG)  $(STFLAG) $(PARALLEL) -c phaebb.c  
+
+phaebb:  phaebb.o spec.o interactions.o diagnostics.o  bb.o photons.o find_cell.o  opacity.o \
+	advance.o star.o dens.o inout.o treeio.o  makecells.o treeload.o treegrav.o  clib.o getparam.o mathfns.o
+	$(MPCC) $(PROFFLAG) $(PARALLEL) -o phaebb phaebb.o spec.o interactions.o diagnostics.o bb.o photons.o\
+	find_cell.o star.o opacity.o  advance.o dens.o inout.o treeio.o  makecells.o treeload.o treegrav.o \
+	mathfns.o clib.o getparam.o -lm 
+  
+
+clean:
+	\rm *.o
+
+
+

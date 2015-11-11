@@ -1,0 +1,3 @@
+mr spec.sm
+plot ../execdir 2 0
+plot " ../execdir" 2 0

@@ -1,0 +1,90 @@
+#-----------------------------------------------------------------------------
+# CONTROL OPTIONS   
+#-----------------------------------------------------------------------------
+0.2             OUTPUT_FACTOR  
+0               RESTART
+0               MORE
+#-----------------------------------------------------------------------------
+# AMBIENT RADIATION FIELD (ISRF) 
+#-----------------------------------------------------------------------------
+1               ISRF      /* 0: no ISRF 1: yes ISRF */
+1e5   		ISRF_NPACKETS   
+1               R_ISRF==R_MAX (1=yes 0=no; if no then use next value)
+0            	R_ISRF   /* radius from which photons are emitted isrf */
+1.0         	ISRF_MULTIPLY
+1               IRSF_IGNORE_SCATTER
+1000        	STAR_ISRF_TEMP 
+1            	DILUTION (STAR_ISRF)
+#-----------------------------------------------------------------------------
+# STELLAR RADIATION FIELD (STAR)  
+#-----------------------------------------------------------------------------
+0               MANUAL_STAR
+0               MANUAL_STAR_TYPE
+0               STAR_SED_FILE
+1e7 		STAR_NPACKETS   
+2               STAR_RADIUS (in Solar radii) 
+0  		STAR_X
+0  		STAR_Y
+0  		STAR_Z
+0  		STAR_MASS
+3250 	 	STAR_TEMP
+0  		STAR_R
+#-----------------------------------------------------------------------------
+# SED & ISOPHOTAL MAPS PARAMETERs
+#-----------------------------------------------------------------------------
+140	   	DISTANCE ( in pc -- source distance from us)
+0.056 	  	DTHETA ([0,pi]- in units of pi - angle to count escaping photons)
+0.005           SL1 (lower lambda -micron- of placing photons in lambda-bins)   
+4000.           SL2 (upper ...)
+# Wavelengths (microns) to calculate isophotal maps (up to 10)  --------------
+70  0		F0
+160 0		F1
+250 0		F2
+350 0		F3
+500 0		F4
+170 0		F5
+250 0		F6
+350 45		F7
+500   0         F8
+1200 0		F9
+# Size of area of intensity map (pc or AU) -----------------------------------
+-20000		XMIN  
+ 20000 		XMAX 
+-20000		YMIN 
+ 20000		YMAX
+#Polar angles to compute intensity maps -- in degrees (up to 10) -------------
+ 0 		THETA0 
+90 		THETA1 
+40 		THETA2 
+44 		THETA3 	
+48 		THETA4 
+52 		THETA5 
+56 		THETA6 
+0		THETA7 
+0		THETA8 	
+0		THETA9 
+# Azimuthal angles to compute intensity maps (up to 10) ----------------------
+0		PHI0
+90		PHI1
+0		PHI2
+0		PHI3
+0		PHI4
+0		PHI5
+0		PHI6
+0		PHI7
+0		PHI8	
+0		PHI9
+#-----------------------------------------------------------------------------
+# DUST PARAMETERS  
+#-----------------------------------------------------------------------------
+1200  		DUST_TEMP (dust destruction temperature)
+1.0     	SCATTER_MULTIPLY
+0.5     	G_SCATTER
+#-----------------------------------------------------------------------------
+# PROPAGE PHOTONS  
+#-----------------------------------------------------------------------------
+0.05		STEP_MFP
+0.5		STEP_DENS
+0.5		STEP_R
+0.5		STEP_CELL
+0.5 		INNER_STEP_SIZE

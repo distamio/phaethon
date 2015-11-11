@@ -1,0 +1,15 @@
+Opacity tables (opacity.dat, mopacity.dat) and reemission propabilities
+(ptable.dat) 
+
+UNITS: CGS 
+
+OH5 + MRN
+
+* gas-to-dust ratio: 100 (so I divide OH5/100 to get cgs)  
+
+* absorption: lambda>1 micron   -->  OH5
+              lambda<1 micron   -->  MRN (after matching to OH5 at 1micron)
+              lambda>1000micron -->  continue OH5  
+
+* scattering: MRN/2
+

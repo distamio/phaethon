@@ -1,0 +1,417 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage{graphicx}
+%\usepackage{floatflt}
+\usepackage{wrapfig}
+\pagestyle{plain}
+\AtBeginDocument{
+  \renewcommand{\labelitemii}{\(\circ\)}}
+                                   
+
+\topmargin -2cm
+\textheight 26cm
+\textwidth 18cm
+\evensidemargin -1cm
+\oddsidemargin -1cm
+
+
+\begin{document}
+
+
+\title{{\sc Phaethon}\\ \vspace{0.5cm}  \large{\cal{Userguide}}}
+
+\author{Dimitris Stamatellos}
+
+\maketitle
+
+\small
+\pagebreak
+
+
+\section{Source code}
+
+The source code can be copied from the directory: 
+\begin{center}
+{\texttt{/home/athena/spxstd/phaethon}}
+\end{center}
+
+This folder contains current and previous versions of the code in the format:
+\begin{center}
+\texttt{nphaethon.year.month.day.tar}
+\end{center}
+
+Copy the latest version to your space and then
+
+ \begin{center}
+\texttt{tar xvf nphaethon.year.month.day.tar}
+\end{center}
+
+This command will create a directory \texttt{nphaethon} , with the following files and subdirectories
+
+\vspace{1cm}
+{\centering 
+\begin{tabular}{|p{4cm}|p{13.1cm}|}
+\hline
+\multicolumn{2}{|c|}{}\\ 
+\multicolumn{2}{|c|}{\large\texttt{nphaethon}}\\
+\multicolumn{2}{|c|}{}\\  
+\hline
+Name & Description \\
+\hline
+\texttt{Makefile} & \\
+\texttt{makefiletai.mk}&  \\
+\texttt{params.dat}& general parameters, including flow control, ambient and stellar radiation field, SEDs and intensity maps\\
+\texttt{params.grid.dat}& parameters relating to the grid construction \\
+\texttt{main}& directory containing the main code routines\\
+\texttt{exec}& directory where executables and required files are put\\
+\texttt{grid.spherical}& contains the routines for constructing the grid, and grid related routines, e.g. advance photon, find photon cell, find photon origin, grid density profile \\
+\texttt{isrf}& contains the data for the ambient radiation field \\
+\texttt{opacity.0H5\_0.1\_200}& contains the opacity tables for OH5 opacity. The tables are constucted for temperatures up to 200K, with temperature resolution of 0.1 K\\
+\texttt{utils}& various routines for analysing results\\
+\texttt{userguide}& contains the userguide\\
+\hline
+\end{tabular}
+\par}
+\vspace{1cm}
+
+
+\section{Building and running the code}
+
+After you configure \texttt{Makefile} to your liking you  build the code by typing
+{\texttt{make}}. This will copy everything the code needs to run in the directory {\texttt{exec}} (including the sample files \texttt{params.dat} \& \texttt{params.grid.dat}. To run the code move into {\texttt{exec}} and type \texttt{phaethon}. During your run there is information printed on the screen and the following output files are produced:
+
+\vspace{2cm}
+{\centering 
+\begin{tabular}{|p{4cm}|p{13.1cm}|}
+\hline
+\multicolumn{2}{|c|}{}\\ 
+\multicolumn{2}{|c|}{\large\texttt{Output files}}\\
+\multicolumn{2}{|c|}{}\\  
+\hline
+File name & Description \\
+\hline
+\texttt{incells.dat} &  information about the initial state of your system (eg. cells, density, temperature)\\
+\texttt{outcells.dat} &   information about the initial state of your system (eg. cells, density, temperature, energy absorbed per cell)\\
+\texttt{Av.r.dat} & shows the optical visual extinction vs radius (for spherically symmetric cores\\
+\texttt{restart.dat} & information needed when restarting a run \\
+\texttt{step.info} & information about how long it takes the code to run\\
+\texttt{sed.id.lbin.mbin} & SEDs for a specific photon id for a specific direction (lbin,mbin)\\
+\texttt{iso.fs.id.lbin.mbin} & intensity maps for a specific $\lambda$ (fs) photon id for a specific direction (lbin,mbin) (NXPIXELS $\times$ NYPIXELS) \\
+\texttt{isodata.fs.id} & radial intensity profilesfor a specific photon id  (this is only for spherically symmetric cores \\
+\texttt{intercount.s} & \\
+
+\texttt{fnum.star.0.dat} & \\
+\texttt{fnum.star.cgs.0.dat} & \\
+\hline
+\end{tabular}
+\par}
+
+\vspace{1cm}
+{\centering 
+\begin{tabular}{|p{1cm}|p{16.1cm}|}
+\hline
+\multicolumn{2}{|c|}{}\\ 
+\multicolumn{2}{|c|}{\large Photon ids}\\
+\multicolumn{2}{|c|}{}\\  
+\hline
+id & Description \\
+\hline
+0  & all photons are counted  \\
+1  &  only direct photons  from the radiation source are  counted (i.e. if they do not have any interaction at all with the system)\\
+2  &  only  photons  coming from a part system are counted (set by \texttt{R\_ORIGIN} in \texttt{params.grid.dat}) \\
+3  & only scattered photons are counted (just scattered!) \\
+4  & only reprocessed photons are counted (absorbed and maybe scattered) \\
+\hline
+\end{tabular}
+\par}
+
+{\centering 
+\begin{tabular}{|p{3.2cm}|p{9.5cm}|p{3.9cm}|p{0.3cm}|}
+\hline
+\multicolumn{4}{|c|}{}\\ 
+\multicolumn{4}{|c|}{\large\texttt{Makefile}}\\
+\multicolumn{4}{|c|}{}\\  
+\hline
+Variable name & Description & Recommended values & S \\
+\hline
+\multicolumn{4}{|c|}{}\\ 
+\hline
+\texttt{CC} & sets the c compiler & gcc&  $\surd$\\
+\texttt{OPENMP}  & compile the paraller version & 0: NO 1: YES & $\times$ \\
+\texttt{OPTIMISE} & optimisation level & 3 & ?\\
+\texttt{PROFILE}   & sets the -p -pg flag for time profiling & 0: NO 1: YES & ? \\
+\texttt{MAIN\_DIR} &  directory of the main code & \$(PWD)/main & $\surd$ \\
+\texttt{GRIDDIR}  & directory of the grid making code & \$(PWD)/grid.spherical & $\surd$\\
+\texttt{OPACITY\_DIR} & directory of opacity &\$(PWD)/opacity.0H5\_0.1\_200  & $\surd$\\
+\texttt{ISRFD\_IR} & directory of the ambient radiation field & & $\surd$\\
+\texttt{EXEC\_DIR} &  directory to put executable and required files &\$(PWD)/exec & $\surd$\\
+\hline
+\multicolumn{4}{|c|}{Grid}\\ 
+\hline
+\texttt{SPHERICAL}&sets a spherically symmetric grid and adjusts code for better performance (note: other options maybe disabled when this flag is on) & 0: NO 1: YES&  $\surd$ \\
+\texttt{DIM}& refers to the 'dimensions' of the physical system 3: fully 3D system, 2: azimuthal  and $\theta$, -$\theta$ symmetry (e.g. flattened cloud, disc), 4: azimuthal symmetry & 3, 2, 4 & $\surd$\\
+\hline
+\multicolumn{4}{|c|}{SEDs \& Intensity maps}\\
+\hline
+\texttt{NFBINS} & number of frequency bins to put escaping photons & 120 &  $\surd$\\
+\texttt{FS} & number of wavelenghts to calculate intensity maps & 1-10 &  $\surd$ \\
+\texttt{NLBINS} & number of polar angles (theta) to calculate intensity maps & 1-10 &$\surd$\\
+\texttt{NMBINS}& number of azimuthal angles (phi) to calculate intensity maps & 1-10 &$\surd$\\
+\texttt{DO\_ISOMAP} & calculate SEDs and isophotal maps? & 0: NO 1: YES&  $\surd$ \\
+\texttt{NBBINS} & number of radial bins to calculate intensity (only for SPHERICAL case) & 80 & $\surd$\\
+\texttt{NXPIXELS} & number of xpixels for intensity maps & 128 &  $\surd$\\
+\texttt{NYPIXELS}& number of ypixels for intensity maps & 128 &  $\surd$\\
+\texttt{ISODIM}& refers to the 'dimensions' of the appearence of the system (i.e. SEDs and intensity maps). The physical system maybe 3D but may look the same from different directions when viewed e.g. in long wavelengths.  3: fully 3D system, 2: azimuthal  and $\theta$, -$\theta$ symmetry (e.g. flattened cloud, disc), 4: azimuthal symmetry & 3, 2, 4 & $\surd$\\
+\texttt{EXTRA\_SYMMETRY}& & & $\times$ \\
+\texttt{SPHERICAL\_ISOMAP}& calculates intensity maps assuming that the system is spherically symmetric (it just makes radial bins and computes averages) &  0, 1 & ? \\
+\texttt{SPHERICAL\_SED}& calculates SEDs assuming that the system looks the same from all viewing angles (counting all available photons) &  0, 1 & $\surd$ \\
+
+\hline
+\multicolumn{4}{|c|}{Other options}\\
+\hline
+\texttt{NO\_INTERACTION }& photons escape without any interactions (for testing) &0: NO 1: YES &$\surd$ \\
+\texttt{MULTIPLE\_PHOTONS}& & & $\times$ \\
+\texttt{TREE\_INFO\_OUT}& & & $\times$ \\
+\texttt{INFO\_OUTPUT }& output info as photon propagates (for testing) & & $\surd$ \\
+\texttt{NO\_OPA\_TABLE }& there is an opacity equation not a table & & $\times$ \\
+\texttt{DUST\_MIX}& use 2 types of dust & & $\times$ \\
+\texttt{INC\_SHADOW\_PHOTONS}& & & $\times$ \\
+\texttt{LENGTH\_UNIT}& length unit for inputing in params.dat and params.grid.dat & PC or AU & $\surd$\\
+\texttt{SPH\_SIMULATION}& RT in SPH snapshots & & $\times$ \\
+\hline
+\end{tabular}
+\par}
+
+\pagebreak 
+{\centering 
+\begin{tabular}{|p{3.3cm}|p{10.4cm}|p{2.5cm}|p{0.3cm}|}
+\hline
+\multicolumn{4}{|c|}{}\\ 
+\multicolumn{4}{|c|}{\large \texttt{params.dat (I)} }\\ 
+\multicolumn{4}{|c|}{}\\ 
+\hline
+Variable name & Description & Value(s) & S \\
+\hline
+\multicolumn{4}{|c|}{Control options}\\
+\hline
+\texttt{OUTPUT\_FACTOR} & how often to output data (in units of total photon number) & 0.1 &$\surd$\\
+\texttt{RESTART} & is the run a restart? & 0: NO\ 1:YES & $\surd$\\
+\texttt{MORE} & is the run adding another luminosity source to existing run? & 0: NO\ 1:YES & $\surd$\\
+\hline
+\end{tabular}
+\par}
+
+\vspace{1cm}
+
+{\centering 
+\begin{tabular}{|p{3.3cm}|p{10.4cm}|p{2.5cm}|p{0.3cm}|}
+\hline
+\multicolumn{4}{|c|}{}\\ 
+\multicolumn{4}{|c|}{\large \texttt{params.dat (II)} }\\ 
+\multicolumn{4}{|c|}{}\\ 
+\hline
+Variable name & Description & Value(s) & S \\
+\hline
+\multicolumn{4}{|c|}{Ambient radiation field}\\
+\hline
+\texttt{ISRF} & is there an ambient radiation field & 0: NO\ 1:YES  &$\surd$\\
+\texttt{ISRF\_NPACKETS} & number of ambient radiation field photon packets to use & $10^8$ & $\surd$\\
+\texttt{R\_ISRF==R\_MAX} & are ambient photons injected from cloud radius & 0: NO\ 1:YES &$\surd$\\
+\texttt{R\_ISRF} & radius from which ambient photons are injected from (if above is 0) (pc or AU) & 0.3 &$\surd$\\
+\texttt{ISRF\_MULTIPLY} & value you multiply ambient radiation field (to weaken or strengthen) & 1 &$\surd$\\
+\texttt{ISRF\_IGNORE\_SCATTER} & ignore ISRF scattering photons when making SED & 1 &$\surd$\\
+\texttt{STAR\_ISRF\_TEMP}& temperature of the star-like (blackbody) ambient field & 20 & ? \\
+\texttt{DILUTION } & STAR\_ISRF :: value you multiply star-like ambient radiation field & 1 & ?\\
+\hline
+\multicolumn{4}{|c|}{Stellar radiation field}\\
+\hline
+\texttt{MANUAL\_STAR} & include an extra star in the simulation? & 0: NO, 1: YES&$\surd$ \\
+\texttt{MANUAL\_STAR\_TYPE} & type of star included (star.type) & 0: star in the centre of coordinates 3: star outside cloud & $\surd$ \\
+\texttt{STAR\_NPACKETS} & number of stellar photons to use & $10^7$ & $\surd$ \\
+\texttt{STAR\_RADIUS} & star radius (in solar radii) & 1-3 & $\surd$\\
+\texttt{STAR\_X} & star x-location (pc or AU) & 0 & $\surd$\\
+\texttt{STAR\_Y} & star y-location (pc or AU) & 0 & $\surd$\\
+\texttt{STAR\_Z} & star z-location (pc or AU) & 20000 AU & $\surd$\\
+\texttt{STAR\_MASS} & star mass (in solar masses)  & 0 & $\surd$\\
+\texttt{STAR\_TEMP} & star temperature (K) & 6000 & $\surd$\\
+\hline
+\end{tabular}
+\par}
+
+\vspace{1cm}
+
+{\centering 
+\begin{tabular}{|p{3.3cm}|p{10.4cm}|p{2.5cm}|p{0.3cm}|}
+\hline
+\multicolumn{4}{|c|}{}\\ 
+\multicolumn{4}{|c|}{\large \texttt{params.dat (III)} }\\ 
+\multicolumn{4}{|c|}{}\\ 
+\hline
+Variable name & Description & Value(s) & S \\
+\hline
+\multicolumn{4}{|c|}{SED \& Intensity maps parameters}\\
+\hline
+\texttt{DISTANCE} & distance of the object (from Earth, in pc) &  2000 &$\surd$ \\
+\texttt{DTHETA} & tolerance angle from observer's line-of-sight to count photons $[0,1]$ 
+(in units of $\pi$)& 0.05 & $\surd$\\
+\texttt{SL1} & lower $\lambda$ (in $\mu m$) of placing escaping photons in $\lambda$-bins& 0.005 & $\surd$\\
+\texttt{SL2} & upper $\lambda$ & 4000 & $\surd$\\
+\texttt{F0} & 1$^{\rm st} \lambda$ to calculate intensity map & 10& $\surd$\\
+\texttt{F1} & 2$^{\rm nd} \lambda$ & 850 & $\surd$\\
+\texttt{F2} & 3$^{\rm rd} \lambda$ & & $\surd$\\
+\texttt{F3} & 4$^{\rm th} \lambda$ & & $\surd$\\
+\texttt{F4} & 5$^{\rm th} \lambda$ & & $\surd$\\
+\texttt{F5} & 6$^{\rm th} \lambda$ & & $\surd$\\
+\texttt{F6} & 7$^{\rm th} \lambda$ & & $\surd$\\
+\texttt{F7} & 8$^{\rm th} \lambda$ & & $\surd$\\
+\texttt{F8} & 9$^{\rm th} \lambda$ & & $\surd$\\
+\texttt{F9} & 10$^{\rm th} \lambda$ & & $\surd$\\
+\texttt{XMIN} & minimum x coordinate of intensity map (in pc or AU)& & $\surd$\\
+\texttt{XMAX} & maximum x& & $\surd$\\
+\texttt{YMIN} & minimum  y& & $\surd$\\
+\texttt{YMAX} & maximum y& & $\surd$\\
+\texttt{THETA0} & 1$^{\rm st} \theta$ of observer to calculate intensity map& &$\surd$\\
+\texttt{THETA1} & 2$^{\rm nd}\theta$& & $\surd$\\
+\texttt{THETA2} & 3$^{\rm rd}\theta$& & $\surd$\\
+\texttt{THETA3} & 4$^{\rm th}\theta$& & $\surd$\\
+\texttt{THETA4} & 5$^{\rm th}\theta$& & $\surd$\\
+\texttt{THETA5} & 6$^{\rm th}\theta$& & $\surd$\\
+\texttt{THETA6} & 7$^{\rm th}\theta$& & $\surd$\\
+\texttt{THETA7} & 8$^{\rm th}\theta$& & $\surd$\\
+\texttt{THETA8} & 8$^{\rm th}\theta$& & $\surd$\\
+\texttt{THETA9} & 10$^{\rm th}\theta$& & $\surd$\\
+\texttt{PHI0} & 1$^{\rm st}\phi$ of observer to calculate intensity map& & $\surd$\\
+\texttt{PHI1} & 2$^{\rm nd}\phi$ & & $\surd$\\
+\texttt{PHI2} & 3$^{\rm rd}\phi$ & & $\surd$\\
+\texttt{PHI3} & 4$^{\rm th}\phi$ & & $\surd$\\
+\texttt{PHI4} & 5$^{\rm th}\phi$ & & $\surd$\\
+\texttt{PHI5} & 6$^{\rm th}\phi$ & & $\surd$\\
+\texttt{PHI6} & 7$^{\rm th}\phi$ & & $\surd$\\
+\texttt{PHI7} & 8$^{\rm th}\phi$ & & $\surd$\\
+\texttt{PHI8} & 9$^{\rm th}\phi$ & & $\surd$\\
+\texttt{PHI9} & 10$^{\rm th}\phi$ & & $\surd$\\
+\hline
+\end{tabular}
+\par}
+
+\vspace{1cm}
+
+{\centering 
+\begin{tabular}{|p{3.3cm}|p{10.4cm}|p{2.5cm}|p{0.3cm}|}
+\hline
+\multicolumn{4}{|c|}{}\\ 
+\multicolumn{4}{|c|}{\large \texttt{params.dat (IV)} }\\ 
+\multicolumn{4}{|c|}{}\\ 
+\hline
+Variable name & Description & Value(s) & S \\
+\hline
+\multicolumn{4}{|c|}{Dust parameters}\\
+\hline
+\texttt{DUST\_TEMP} & Dust destruction temperature (in K) & 1200 & \\
+\texttt{SCATTER\_MULTIPLY} &  multiply scattering opacity ($k_scat$) by this factor & 1.0 & \\
+\texttt{G\_SCATTER} &  & 0.5 & \\
+\hline
+\multicolumn{4}{|c|}{Propagate photons}\\
+\hline
+\texttt{STEP\_MFP} & & & \\
+\texttt{STEP\_DENS} & & & \\
+\texttt{STEP\_R} & & & \\
+\texttt{STEP\_CELL} & & & \\
+\texttt{INNER\_STEP\_SIZE} & & & \\
+\hline
+\end{tabular}
+\par}
+
+
+\newpage
+
+{\large \texttt{grid.1}}
+
+\vspace{1cm}
+\noindent Prestellar/protostellar cores (3 types of geometries: spherical, flattened, comet-like, with/without disc around the protostar), with/withouth jets. Discs can work independently (by setting \texttt{ENVELOPE} to 0).
+\vspace{1cm}
+
+
+{\centering 
+\begin{tabular}{|p{4.4cm}|p{10.1cm}|p{2.3cm}|p{0.3cm}|}
+\hline
+\multicolumn{4}{|c|}{}\\ 
+\multicolumn{4}{|c|}{\large \texttt{grid} :: \texttt{params.grid.dat} }\\ 
+\multicolumn{4}{|c|}{}\\ 
+\hline
+Variable name & Description & Value(s) & S \\
+\hline
+\multicolumn{4}{|c|}{Cloud/Core parameters}\\
+\hline
+\texttt{CDENS0} & central density (in cm$^{-3}$) & $10^5$ & $\surd$\\
+\texttt{R0} & flattening radius (in AU or PC, as set in \texttt{Makefile}) & 0.3 & $\surd$\\
+\texttt{R\_MAX\_CORE}& size of core (in AU or PC) & 0.5 & $\surd$\\
+\texttt{R\_MAX}& size of core and ambient cloud (sets auto to 0 if MCCELLS=0) (in AU or PC)  & 0.7&$\surd$\\
+\texttt{R\_ORIGIN}& radius within which photons are counted with id=2 & 0.5 &$\surd$\\
+\texttt{DENS\_EXT\_FACTOR}& ratio of cloud density to the core density at \texttt{R\_MAX\_CORE}& 0.8 & $\surd$\\
+\texttt{R\_DUST}& size of the innermost cell (in units of \texttt{R\_MAX\_CORE}) & 0.01 & $\surd$\\
+\texttt{MU}& mean mocular weight & 2.3 & $\surd$\\
+\texttt{BECELLS}& number of radial cells-1 to divide the core ($\geq2)$& 102 &$\surd$\\
+\texttt{MCCELLS}& number of radial cells to divide the ambient cloud ($\geq0$) & 10 & $\surd$\\
+\texttt{NLCELLS} & number of polar cells-1 to divide the cloud ($\geq2$)& 10 & ? \\
+\texttt{NMCELLS} & number of azimuthal cells-1 to divide the cloud ($\geq2$)& 10 &$\surd$\\
+\texttt{LINEAR} & radial cells have 1: equal widths \ 0: equal log widths & 0 or 1 & $\surd$\\
+\texttt{ISOANGLES} & polar cells have 1: equal angles \ 2: equal cosines & 0 or 1 & $\surd$\\
+\texttt{FTAU\_POINTS} & number of points to use to calculate $\tau_{\rm visual}$ for the cloud \& core & 1000 & $\surd$\\
+\texttt{GEOMETRY} & 1: spherical cloud, 2 : flattened cloud, 3: comet-like cloud & 1, 2, 3& $\surd$\\
+\texttt{SIN\_POWER} &  Sine exponent ($p$) in the density profile & 1, 2, 4& $\surd$\\
+\texttt{ASYMMETRY\_FACTOR} & Relates to A and sets how pronounces the asymmetry is& $ >=1$ \& $<3$ & $\surd$\\
+\hline
+\multicolumn{4}{|c|}{Disc around  central star parameters}\\
+\hline
+\texttt{DISC} & is there a disc around the central source? & 0: No, 1: Yes & $\surd$\\
+\texttt{DISC\_CDENS0} &  Disc density at 1AU from the central source (cm$^{-3}$)& & $\surd$\\
+\texttt{DISC\_THETA\_OPENING} & Up to what angle (in units of \texttt{DISC\_ALPHA}, from the midplane) the disc extends & $2-5$  & $\surd$ \\
+\texttt{DISC\_R} &  Size of disc (in AU) & $5-100$ AU& $\surd$\\
+\texttt{DISC\_ALPHA} &  thickness-to-radius ratio (z/R) of the disc & & $\surd$\\
+\texttt{DISC\_AMBIENT\_DENS} &  the density at angles (theta) outside  \texttt{DISC\_THETA\_OPENING*DISC\_ALPHA} & & ?\\
+\texttt{DISC\_INNER\_GAP} &  Size of the gap around the central source in AU (this is always $>=$ the dust destruction radius) & $0.1-2$ AU& $\surd$\\
+\texttt{DISC\_INNER\_GAP==R\_DUST} & Set the inner disc gap the same as R\_DUST?  & & $\surd$\\
+\hline
+\multicolumn{4}{|c|}{Jet from  central star parameters}\\
+\hline
+\texttt{JET} & Is there a jet from the central star? & 0: No, 1: Yes&$\surd$\\
+\texttt{JET\_DENS} & Density in the the jet cavity(cm$^{-3}$)& $10^3$ &$\surd$\\
+\texttt{JET\_BETA} & & $3$ &$\surd$\\
+\texttt{JET\_THETA} & (in unit of $\pi$) & 0.027 &$\surd$\\
+\hline
+\end{tabular}
+\par}
+
+\newpage
+
+{\bf SPHERICAL CLOUD}
+\begin{equation}
+n=n_0\ \frac{1}{1+(r/R_0)^2}
+\end{equation}
+\\
+$n_0$: CDENS0
+\\
+$R_0$: R0
+\vspace{.3cm}
+
+{\bf FLATTENED CLOUD}
+
+\begin{equation}
+\label{eq:disk.core}
+n(r,\theta)=n_0\frac{1+A\left(\frac{r}{R_0}\right)^2
+\left[\sin(\theta)\right]^p}{\left[1+\left(\frac{r}{R_0}\right)^2\right]^2}\;.
+\end{equation}
+$n_c$ is the the density at the centre of the core,  and $r_0$ the scale
+length. $A$ is a factor that determines the equatorial-to-polar  optical
+depth ratio $e$ (i.e. the optical depth from the
+centre to the surface of the core at $\theta=90$
+divided by the optical depth from the centre to the surface of the core at $\theta=0$) , see page 84 of my thesis.
+
+\vspace{0.3cm}
+$p$: SIN\_POWER
+
+$E$: relates to A
+
+
+
+\end{document}

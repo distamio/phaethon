@@ -1,0 +1,40 @@
+#-----------------------------------------------------------------------------
+# GRID PARAMETERS 
+#-----------------------------------------------------------------------------
+1		ENVELOPE?
+2.074e+07       CDENS0 (cm^{-3}) 
+0.001303        R0 (pc or AU)
+0.004753       	R_MAX_CORE (pc or AU)
+0.009506    	R_MAX (pc or AU) 
+2000            R_ORIGIN (pc or AU)
+1.589e-01   	DENS_EXT_FACTOR  
+0.01   		R_DUST (in units_of_R_MAX_CORE)
+2.3           	MU
+102		BECELLS
+10		MCCELLS
+10 		NLCELLS
+10		NMCELLS
+1              	LINEAR (if 0 then LOG)
+1 	       	ISOANGLES (if 0 then ISO-COS)	
+1000           	FTAU_POINTS
+0               GEOMETRY (0: spherical, 1: flattened, 2: comet like)
+4               SIN_POWER (values: 1,2,4; for GEOMETRY 1 or 2)
+1.6             ASYMMETRY FACTOR (1<x<3; for GEOMETRY 1 or 2)
+#-----------------------------------------------------------------------------
+# DISC AROUND CENTRAL STAR (if star exists)?
+#-----------------------------------------------------------------------------
+0          	DISC (1: YES, 0: NO) 
+2.074e+07ISC_CDENS0 (disc density at 1 AU) (cm^{-3})
+300       	DISC_R (AU)
+0.1    	        DISC_ALPHA
+2      		DISC_INNER_GAP (AU)
+0 		DISC_INNER_GAP==R_DUST?  
+5               DISC_THETA_OPENING ANLGLE (units of DISC_ALPHA)  
+0.0		DISC_AMBIENT_DENS
+#-----------------------------------------------------------------------------
+# JET CENTRAL STAR (if star and disc exists)? 
+#-----------------------------------------------------------------------------
+0               JET/DISC OPENING ANGLE  (1: YES, 0: NO)
+1e3     	JET_DENS (cm^{-3}) 
+3               JET_BETA
+0.0277		JET_THETA (in units of pi) 

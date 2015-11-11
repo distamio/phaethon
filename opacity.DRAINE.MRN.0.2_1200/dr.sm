@@ -1,0 +1,40 @@
+# plots draine opacity vs lambda 
+plot 2
+
+ expand 1.6
+ TICKSIZE   -1 0 -1 0
+ limits -2 3 -3 4
+ box
+
+ data $1
+ lines 10 700
+ expand 1.6
+ read  lambda  1
+ read  albedo  2
+ read  total 5
+
+ set scattering=albedo*total
+ set absorption=(1-albedo)*total
+
+ ltype 0
+ connect (lg(lambda)) (lg(($2*absorption)))
+
+ ltype 2 
+ connect (lg(lambda)) (lg(($2*scattering)))
+ ctype red
+ ltype 0
+# connect (lg(lambda)) (lg(($2*(scattering+absorption))))
+#  connect (lg(lambda)) (((scattering/(scattering+absorption))))
+ ltype 2 
+ ctype 5
+# connect (lg(lambda)) (lg(2*20/lambda**0.6/3))
+# connect (lg(lambda)) (lg(20/lambda**0.6/3))
+ ctype 3
+ ltype 0
+# connect (lg(lambda)) (lg(20/lambda**0.6))
+# connect (lg(lambda)) (lg((scattering/absorption)))
+ ctype 0
+
+ xlabel  \lambda (\mu m)
+ ylabel Opacity (cm^{2} g^{-1})
+# ylabel albedo

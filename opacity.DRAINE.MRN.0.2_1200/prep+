@@ -1,0 +1,9 @@
+# copy opacity files to  given directory 
+#  and add '2' in the name 
+
+
+cp opacity.dat  $1/opacity2.dat 
+cp mopacity.dat  $1/mopacity2.dat 
+cp ptable.dat  $1/ptable2.dat 
+
+

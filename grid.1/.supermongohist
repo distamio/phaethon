@@ -1,0 +1,8 @@
+mr minfo.sm
+plot ../run2 red 4
+plot ../run2 green 4
+plot ../run2 green 0
+plot ../run2 red 4
+plot ../run2 green 0
+plot ../run2 green 4
+plot ../run2 red 4

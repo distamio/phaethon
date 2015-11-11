@@ -1,0 +1,28 @@
+#plots planck mean opacity vs temp
+
+plot
+ expand 1.001
+
+ data mopacity.dat
+ lines 1 10000
+
+ read  temp 1
+ read  mean_opacity 2
+
+
+
+ TICKSIZE   -1 0 -1 0
+ 
+ limits -0.7 4  -4 3.5 
+
+  lweight 1
+ expand 1.1
+ location  4000 31000 3000 30000
+  box
+
+
+ ltype 0 
+ connect (lg(temp)) (lg(mean_opacity)) 
+
+ xlabel Temperature (K) 
+ ylabel Planck Mean Opacity (cm^{2} g^{-1})

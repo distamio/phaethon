@@ -1,0 +1,17 @@
+void mgrid(ctypeptr);
+double f(double, double, double, double, double);
+double bisection(double, double, double, double ,double, double);
+double dens(double,double,double);
+double mass(double, double, double, double ,double, double);
+double dens_cloud(double,double,double);
+double mass_cloud(double, double, double, double ,double, double);
+void init_cell(ctypeptr,double,double);
+void find_cell_mass(ctypeptr);
+void find_cell_dens(ctypeptr);
+void find_cell_tau(ctypeptr);
+void find_tau();
+void find_tau_disc();
+void MC_fix_cells(ctypeptr,double,double);
+double dens_disc(double,double,double);
+double mass_disc(double, double, double, double ,double, double);
+double find_k_visual(double);

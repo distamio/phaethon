@@ -1,0 +1,71 @@
+ ##### temp profile #################################
+
+plot 2         #1.directory name 2. colour 
+ expand 1.001
+ notation -4 4  -4 4
+ define r1 0
+ define r2 2100
+
+ define NRCELLS 113
+ define NLCELLS 2
+ define NMCELLS 2
+
+ define NRCELLS ($NRCELLS-1)
+ define NLCELLS ($NLCELLS-1)
+ define NMCELLS ($NMCELLS-1)
+
+
+ define AU 1.496e13 
+ expand 1.8 
+
+  location  5000 30000 5000 30000
+  TICKSIZE -1   0  0 0  
+  limits -1 4.5 0 30 
+
+  TICKSIZE 0   0  0 0  
+  limits 0  1900 0 13
+
+  box
+
+  xlabel r (AU)   
+  ylabel Temperature (K) 
+  ltype 0 
+
+ do i=0,(($NLCELLS-1)*($NMCELLS-1)){
+
+ define a  (1+2+2*$i*$NRCELLS)
+ define b (2*(2*$i+1)+(2*$i+1)*($NRCELLS-2))
+
+ data   $1"/"outcells.dat 
+ lines  $a   $b
+# lines 3 3469
+ read x      1
+ read y      2
+ read z      3
+ read temp   7 
+
+# set temp3=0,$NRCELLS-1
+# do k=2,$NRCELLS-5 {set temp3[$k]=(temp[$k-2]+temp[$k]+temp[$k+2])/3.}
+# set temp3[0]=temp3[2]
+# set temp3[1]=temp3[2]
+# set temp3[$NRCELLS-3]=temp3[$NRCELLS-6]
+# set temp3[$NRCELLS-4]=temp3[$NRCELLS-6]
+# set temp3[$NRCELLS-5]=temp3[$NRCELLS-6]
+
+ ltype 0
+ ctype $2
+ smooth temp temp2 5 
+ connect (((x)/$AU)) ((temp))  
+ }
+ ctype 0
+ 
+ define t0  1000
+ define r0  0.1
+ set r=1,10001
+ do i=1,10000 {set r[$i]=$i/10}
+
+ set temp1=$t0*(r/$r0)**(-0.5)
+ set temp2=$t0*(r/$r0)**(-0.75)
+ 
+# connect (lg(r)) (lg(temp1)) 
+# connect (lg(r)) (lg(temp2))

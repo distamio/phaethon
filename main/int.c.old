@@ -1,0 +1,658 @@
+
+#include <stdio.h>
+#include <math.h>
+#include <stdlib.h>
+#include <time.h>
+
+
+#include "structs.h"
+#include "../grid/params.grid.h"
+#include "../opacity/params.opa.h"
+#include "constants.h"
+#include "../params.h"
+
+#include "functions.h"
+#include "inout.h"
+#include "opacity.h"
+#include "phaethon.functions.h"
+#include "photons.h"
+#include "spec.functions.h"
+#include "interactions.h"
+
+
+/************************ function absorb_photon_reemit  **************************************/
+
+void absorb_photon_reemit(p,i,c,mean_op_ptr,reemit_ptr)
+
+ struct photon_packet_type p[];
+ long i;
+ struct cell_type c[];
+ struct mean_op_type * mean_op_ptr;
+ struct reemit_type * reemit_ptr;
+ 
+{
+ double old_temp,new_temp; /* temperature before absorbing the photon */
+ double R2,R3,R4,aux;
+
+#ifdef INFO_OUTPUT
+ printf(" ABSORBING...\n");
+#endif
+
+ if (c[p[i].cell].mass==0) 
+   { 
+      printf("Mass of absorbing cell is zero !!");
+      printf("%.5e %.5e %.5e %d\n",p[i].x,p[i].theta,p[i].phi,p[i].cell);
+      exit(0);
+    }
+ 
+ old_temp=c[p[i].cell].temp; 
+
+
+c[p[i].cell].abslum=c[p[i].cell].abslum+p[i].lum;
+
+ /* count how may photons have been absorbed */
+
+ c[p[i].cell].nabs=c[p[i].cell].nabs+1;
+
+
+/* find new temperature after absorbing the photon packet */
+
+#ifdef INFO_OUTPUT
+ printf("old Temp: %.1f [cell: %d]\n",old_temp,p[i].cell);
+#endif
+
+
+ {
+
+   if (c[p[i].cell].nabs==1)
+     { 
+       new_temp=c[p[i].cell].temp+(MAX_TEMP-1.)/(TEMPDIM-1.);
+       c[p[i].cell].temp=solve_ree(c[p[i].cell].abslum,c[p[i].cell].mass,old_temp,c[p[i].cell].nabs-1,mean_op_ptr);
+       c[p[i].cell].next_n=invree(new_temp,p[i].lum,c[p[i].cell].mass,mean_op_ptr);
+       /*printf("%d %f \n", c[p[i].cell].next_n,(MAX_TEMP-1.)/(TEMPDIM-1.) );*/
+     }
+   
+   else
+     
+     {
+       if (c[p[i].cell].nabs==c[p[i].cell].next_n)
+	 
+	 {  new_temp=c[p[i].cell].temp+(MAX_TEMP-1.)/(TEMPDIM-1.);
+	 /* printf("+++++++++++++++++++++++++%d %d\n", c[p[i].cell].nabs,c[p[i].cell].next_n );  */ 
+	 c[p[i].cell].temp=new_temp;
+	 c[p[i].cell].next_n=invree(new_temp,p[i].lum,c[p[i].cell].mass,mean_op_ptr);
+	 /* printf("-------------------------%d %d\n", c[p[i].cell].nabs,c[p[i].cell].next_n ); */
+	 }
+       
+       else
+	 
+	 if (c[p[i].cell].nabs>c[p[i].cell].next_n) /* for the case that one absorption leads to temp>t+DTmin */
+	   
+	   {
+	     new_temp=c[p[i].cell].temp+(MAX_TEMP-1.)/(TEMPDIM-1.);
+	     c[p[i].cell].temp=solve_ree(c[p[i].cell].abslum,c[p[i].cell].mass,old_temp,c[p[i].cell].nabs-1,mean_op_ptr);
+	     c[p[i].cell].next_n=invree(new_temp,p[i].lum,c[p[i].cell].mass,mean_op_ptr);
+	   }
+     }
+   
+   new_temp=c[p[i].cell].temp;
+   
+#ifdef INFO_OUTPUT
+   printf("new Temp: %.1f [cell: %d]\n",c[p[i].cell].temp,p[i].cell);
+#endif
+ }
+ 
+/*  if  (c[p[i].cell].temp>20) {printf("new Temp: %.1f [cell: %d]\n",c[p[i].cell].temp,p[i].cell); exit(0);} */
+
+ /* calculate new frequency of the reemitted photon */
+#ifdef INFO_OUTPUT
+ printf("old lambda (micron): %7.1f fpoint:%5d \n",1e4*c_CONST/p[i].f,p[i].fpoint);
+#endif
+ find_new_f(p,i,new_temp,reemit_ptr); 
+#ifdef INFO_OUTPUT
+ printf("new lambda (micron): %7.1f fpoint:%5d\n",1e4*c_CONST/p[i].f,p[i].fpoint);
+#endif
+ 
+ /* give photon packet new direction and new tau */
+
+ /*  R2=generate_random(&idum);
+     R3=generate_random(&idum);
+     R4=generate_random(&idum);
+ */
+
+ R2=(double) (rand())/RAND_MAX;
+ R3=(double) (rand())/RAND_MAX;
+ R4=(double) (rand())/RAND_MAX;
+
+ /* printf( "%.4e %.4e %.4e %.4e\n",R2,R3,R4,1.*RAND_MAX );*/
+ p[i].kz=2.*R2-1;
+
+ aux=sin(acos(p[i].kz));
+ p[i].kx=aux*cos(2.*M_PI*R3);
+ p[i].ky=aux*sin(2.*M_PI*R3);
+
+ p[i].tau=-log(R4);
+
+
+ p[i].abs=p[i].abs+1; 
+ /* p[i].abs=1; p[i].scat=0; */
+
+#ifdef INFO_OUTPUT
+ printf("tau: %.4f \n",p[i].tau);
+#endif
+ return;
+}
+
+/******** Function ree (radiative equllibrium equation) *************/
+
+
+double ree(temp,abslum,mass,mean_op_ptr)
+
+     double temp; 
+     double abslum;
+     double mass;
+     struct mean_op_type * mean_op_ptr;
+    
+
+{
+return 
+(sigma_CONST*pow(temp,4)-(abslum/(4.*mean_opacity(temp,mean_op_ptr)*mass)));
+}
+
+/***************************** Function invree ***************************/
+/* returns the number of photons needed to be absorbed for the tempetarute
+   of a cell with mass 'mass' to be raised to 'temp'
+*/
+ int invree(temp,dL,mass,mean_op_ptr)
+
+     double temp; 
+     double dL;
+     double mass;
+     struct mean_op_type * mean_op_ptr;
+
+{
+return ((int)(4*sigma_CONST*pow(temp,4)*mean_opacity(temp,mean_op_ptr)*mass/dL));
+}
+  
+
+
+
+/******* Function solve ree (Radiative Equilibrium Equation) ********/
+
+double solve_ree(abslum,mass,old_temp,nabs,mean_op_ptr)
+
+double abslum;
+double mass;
+double old_temp;
+int nabs; /* previously absorbed photons, ie c.nabs-1 */ 
+struct mean_op_type * mean_op_ptr;
+
+{
+double temp,aux;
+ 
+ aux=(MAX_TEMP-1.)/(TEMPDIM-1.);
+ 
+ 
+ if (old_temp==0) old_temp=2*aux;
+ 
+ for (temp=old_temp;temp<MAX_TEMP-1;temp=temp+aux)
+   
+   if (ree(temp,abslum,mass,mean_op_ptr)>=0) break;
+ 
+ return(temp);
+ 
+}
+
+
+/***************** function find_new_f *************************************/
+
+/* finds the frequency of the reemitted photon packet */
+
+void find_new_f(p,i,temp,reemit_ptr)
+  
+ struct photon_packet_type p[];
+ long   i;
+ double temp;
+ struct reemit_type * reemit_ptr;
+
+{
+double random;
+int index;
+
+
+ int low=0;
+ int  high=NFREQ-1;
+ int middle;
+
+ /* random=generate_random(&idum); */
+
+random=(double)(rand())/RAND_MAX;
+
+index=(int)(temp/((MAX_TEMP-1)/(TEMPDIM-1)));
+
+/* 
+for(k=NFREQ-1;k>=0;k=k-1)
+
+if (reemit.prob[index][k]<random) break;
+
+p[i].f=reemit.freq[k];
+
+return;
+*/
+
+
+ while (low<=high) {
+
+ middle= (low+high)/2;
+
+ if (random>=(*reemit_ptr).prob[index][middle] && random<(*reemit_ptr).prob[index][middle+1]) 
+
+    break;
+
+ else if (random<(*reemit_ptr).prob[index][middle])
+
+         high=middle-1;
+
+ else low=middle+1;
+
+ }
+
+p[i].f=(*reemit_ptr).freq[middle];
+p[i].fpoint=middle;
+
+return;
+
+}
+
+
+
+#ifdef DUST_MIX
+
+/***** function absorb_photon2 *******************************************/
+
+void absorb_photon_reemit2(p,i,c,mean_op2_ptr, reemit2_ptr)
+
+ struct photon_packet_type p[];
+ long i;
+ struct cell_type c[];
+ struct mean_op_type mean_op2_ptr;
+ struct reemit_type * reemit2_ptr;
+
+{
+ double old_temp,new_temp; /* temperature before absorbing the photon */
+ double min_temp;
+ double R2,R3,R4,aux;
+
+
+#ifdef INFO_OUTPUT
+ printf(" ABSORBING 2...\n");
+#endif
+
+ if (c[p[i].cell].mass==0) 
+   { 
+      printf("Mass of absorbing cell is zero !!");
+      printf("%.5e %.5e %.5e %d\n",p[i].x,p[i].theta,p[i].phi,p[i].cell);
+      exit(0);
+    }
+ 
+ old_temp=c[p[i].cell].temp; 
+
+ c[p[i].cell].abslum=c[p[i].cell].abslum+p[i].lum;
+
+/* count how may photons have been absorbed */
+
+ c[p[i].cell].nabs=c[p[i].cell].nabs+1;
+
+ 
+/* find new temperature after absorbing the photon packet */
+
+#ifdef INFO_OUTPUT
+ printf("old Temp: %.1f [cell: %d]\n",c[p[i].cell].temp,p[i].cell);
+#endif
+ 
+ if (c[p[i].cell].nabs==1)
+ 
+   {  new_temp=c[p[i].cell].temp+(MAX_TEMP-1.)/(TEMPDIM-1.);
+     c[p[i].cell].temp=solve_ree2(c[p[i].cell].abslum,c[p[i].cell].mass,old_temp,c[p[i].cell].nabs-1,mean_op2_ptr);
+     c[p[i].cell].next_n=invree2(new_temp,p[i].lum,c[p[i].cell].mass,mean_op2_ptr);
+   }
+
+ else
+
+   {
+     if (c[p[i].cell].nabs==c[p[i].cell].next_n)
+       
+       {   new_temp=c[p[i].cell].temp+(MAX_TEMP-1.)/(TEMPDIM-1.);
+	 c[p[i].cell].temp=new_temp;
+	 c[p[i].cell].next_n=invree2(new_temp,p[i].lum,c[p[i].cell].mass,mean_op2_ptr);
+       }
+
+     else
+       
+       if (c[p[i].cell].nabs>c[p[i].cell].next_n) /* for the case that one absorption leads to temp>t+DTmin */
+
+	 {  new_temp=c[p[i].cell].temp+(MAX_TEMP-1.)/(TEMPDIM-1.);
+	   c[p[i].cell].temp=solve_ree(c[p[i].cell].abslum,c[p[i].cell].mass,old_temp,c[p[i].cell].nabs-1,mean_op2_ptr);
+	   c[p[i].cell].next_n=invree(new_temp,p[i].lum,c[p[i].cell].mass,mean_op2_ptr);
+	 }
+   }
+
+
+#ifdef INFO_OUTPUT
+ printf("new Temp: %.1f [cell: %d]\n",c[p[i].cell].temp,p[i].cell);
+#endif
+
+ /* calculate new frequency of the reemitted photon */
+
+ find_new_f2(p,i,new_temp,reemit2_ptr); 
+
+ 
+ /* give photon packet new direction and new tau */
+
+
+ R2=(double) (rand())/RAND_MAX;
+ R3=(double) (rand())/RAND_MAX;
+ R4=(double) (rand())/RAND_MAX;
+
+ p[i].kz=2.*R2-1;
+
+ aux=sin(acos(p[i].kz));
+ p[i].kx=aux*cos(2.*M_PI*R3);
+ p[i].ky=aux*sin(2.*M_PI*R3);
+
+ p[i].tau=-log(R4);
+
+ p[i].abs=p[i].abs+1; 
+ /* p[i].abs=1; p[i].scat=0; */
+
+#ifdef INFO_OUTPUT
+ printf("tau: %.4f \n",p[i].tau);
+#endif
+ return;
+}
+
+
+
+/******** Function ree2 (radiative equllibrium equation) *************/
+
+
+double ree2(temp,abslum,mass,mean_op2_ptr)
+
+     double temp; 
+     double abslum;
+     double mass;
+     struct mean_op_type *mean_op2_ptr;
+
+{
+return 
+(sigma_CONST*pow(temp,4)-(abslum/(4.*mean_opacity(temp,mean_op2_ptr)*mass)));
+}
+
+ 
+  
+
+/***************************** Function invree2 ***************************/
+/* returns the number of photons needed to be absorbed for the tempetarute
+   of a cell with mass 'mass' to be raised to 'temp'
+*/
+ int invree2(temp,dL,mass,mean_op2_ptr)
+
+     double temp; 
+     double dL;
+     double mass;
+    struct mean_op_type * mean_op2_ptr;
+
+{
+return ((int)(4*sigma_CONST*pow(temp,4)*mean_opacity(temp,mean_op2_ptr)*mass/dL));
+}
+  
+
+
+/******* Function solve ree (Radiative Equilibrium Equation) ********/
+
+double solve_ree2(abslum,mass,old_temp,nabs,mean_op2_ptr)
+
+double abslum;
+double mass;
+double old_temp;
+int nabs; /* previously absorbed photons, ie c.nabs-1 */ 
+struct mean_op_type *mean_op2_ptr;
+{
+
+double temp,result,aux;
+   
+double temp,result,aux;
+ 
+ aux=(MAX_TEMP-1.)/(TEMPDIM-1.);
+ 
+ 
+ if (old_temp==0) old_temp=2*aux;
+ 
+ for (temp=old_temp;temp<MAX_TEMP-1;temp=temp+aux)
+   
+   if (ree2(temp,abslum,mass,mean_op2_ptr)>=0) break;
+ 
+ return(temp);
+ 
+
+
+}
+
+
+/***************** function find_new_f *************************************/
+
+/* finds the frequency of the reemitted photon packet */
+
+void find_new_f2(p,i,temp,reemit2)
+  
+ struct photon_packet_type p[];
+ long   i;
+ double temp;
+ struct reemit_type * reemit2_ptr;
+
+{
+int k;
+double random;
+int index;
+
+
+ int low=0;
+ int  high=NFREQ-1;
+ int middle;
+
+random=(double) (rand())/RAND_MAX;
+
+index=(int)(temp/((MAX_TEMP-1)/(TEMPDIM-1)));
+
+/* 
+for(k=NFREQ-1;k>=0;k=k-1)
+
+if (reemit.prob[index][k]<random) break;
+
+p[i].f=reemit.freq[k];
+
+return;
+*/
+
+
+ while (low<=high) {
+
+ middle= (low+high)/2;
+
+ if (random>=(*reemit2_ptr).prob[index][middle] && random<(*reemit2_ptr).prob[index][middle+1]) 
+
+    break;
+
+ else if (random<(*reemit2_ptr).prob[index][middle])
+
+         high=middle-1;
+
+ else low=middle+1;
+
+ }
+
+p[i].f=(*reemit2_ptr).freq[middle];
+p[i].fpoint=middle;
+
+return;
+
+}
+
+
+
+/*********** fix temp2  ****************************************/
+
+void fix_temp2(c)
+
+ struct cell_type c[];
+
+
+{
+  printf("fix_temp2: NoT yet ready!\n");
+
+  exit(0);
+  return;
+}
+
+#endif
+
+
+/***** function scatter_photon ********************************************/
+
+void scatter_photon(p,i,c)
+
+ struct photon_packet_type p[];
+ long i;
+ struct cell_type c[];
+
+{
+ double R2,R3,R4;
+ double costheta=0;     /* scattering angle cosine */
+ double phi;
+ double ks_photon,kx_photon,ky_photon,ks,kx,ky,kz,sin_phi,cos_phi;
+ double g2;
+
+#ifdef INFO_OUTPUT
+ printf(" SCATTERING...\n");
+#endif
+
+ R2=(double) (rand())/RAND_MAX;
+ R3=(double) (rand())/RAND_MAX;
+ R4=(double) (rand())/RAND_MAX;
+
+ /* 
+ R2=generate_random(&idum);
+ R3=generate_random(&idum);
+ R4=generate_random(&idum);
+ */
+
+ g2=G_SCATTER*G_SCATTER;
+
+ if (G_SCATTER!=0.) 
+ {
+ costheta=(1.+g2-pow((1.-g2)/(1+G_SCATTER-2.*G_SCATTER*R2),2))/(2.*G_SCATTER);
+
+ if (costheta<1.e-10) costheta=0.; /* scattering theta */
+ }
+
+ else
+
+ costheta=2.*R2-1;
+
+ /* costheta= new kz at photon's system */
+
+ phi=2.*M_PI*R3;                          /* scattering phi */
+
+ ks_photon=sin(acos(costheta));/* sin(theta_scattering) -direction*/
+ 
+ /* new direction in photon's system */
+
+ kx_photon=ks_photon*cos(phi);
+ ky_photon=ks_photon*sin(phi);
+
+ /* sin(theta_before_scattering) */
+
+ ks=sin(acos(p[i].kz));
+
+ /* new direction in original system */
+
+ kx=kx_photon;
+ ky=p[i].kz*ky_photon+ks*costheta;
+ kz=-ks*ky_photon+p[i].kz*costheta;
+
+ sin_phi=(p[i].ky/ks);
+ cos_phi=(p[i].kx/ks);
+
+ p[i].kx=sin_phi*kx+cos_phi*ky;
+ p[i].ky=-cos_phi*kx+sin_phi*ky;
+ p[i].kz=kz;
+
+ p[i].tau=-log(R4);
+#ifdef INFO_OUTPUT
+ printf("tau: %.4f \n",p[i].tau);
+#endif
+ c[p[i].cell].nscat=c[p[i].cell].nscat+1;
+
+ p[i].scat=p[i].scat+1; 
+ /* p[i].abs=0; p[i].scat=1;*/
+
+ return;
+}
+
+/***** function fix_temp  ********************************************/
+
+void fix_temp(c,mean_op_ptr)
+
+ struct cell_type c[];
+ struct mean_op_type * mean_op_ptr;
+
+ 
+{
+  int s,j,k;
+  int cell;
+
+ 
+    for(k=0;k<(NLCELLS-1)/2;k++)
+     for(j=0;j<NMCELLS-1;j++)
+       for(s=0;s<NRCELLS;s++)
+       {
+         /* cell=(int)(s+(k*NMCELLS+j)*NRCELLS);
+         cell2=(int)(s+((NLCELLS-k-2)*NMCELLS+j)*NRCELLS);
+  	 printf("+++ %d %d   +++ %d %d %d \n", cell,cell2,s,k,j);     */  
+	 c[(int)(s+(k*NMCELLS+j)*NRCELLS)].nabs=
+	   (c[(int)(s+(k*NMCELLS+j)*NRCELLS)].nabs+c[(int)(s+((NLCELLS-k-2)*NMCELLS+j)*NRCELLS)].nabs)/2.;
+	 c[(int)(s+(k*NMCELLS+j)*NRCELLS)].abslum=
+	   (c[(int)(s+(k*NMCELLS+j)*NRCELLS)].abslum+c[(int)(s+((NLCELLS-k-2)*NMCELLS+j)*NRCELLS)].abslum)/2.;
+       }
+  
+ 
+    for(k=((NLCELLS-1)/2);k<NLCELLS-1;k++)
+     for(j=0;j<NMCELLS-1;j++)
+       for(s=0;s<NRCELLS;s++)
+       {
+	 /*	 cell=(int)(s+(k*NMCELLS+j)*NRCELLS); 
+	    cell2=(int)(s+((NLCELLS-k-2)*NMCELLS+j)*NRCELLS);
+	    printf("--- %d %d   --- %d %d %d \n", cell,cell2,s,k,j);*/        
+	 c[(int)(s+(k*NMCELLS+j)*NRCELLS)].nabs=c[(int)(s+((NLCELLS-k-2)*NMCELLS+j)*NRCELLS)].nabs;
+	 c[(int)(s+(k*NMCELLS+j)*NRCELLS)].abslum=c[(int)(s+((NLCELLS-k-2)*NMCELLS+j)*NRCELLS)].abslum;
+       }
+  
+  for(s=0;s<NRCELLS;s++)
+    for(k=0;k<NLCELLS;k++)
+      for(j=0;j<NMCELLS;j++)
+	{
+	  cell=(int)(s+(k*NMCELLS+j)*NRCELLS);
+	  if (c[cell].mass>0) c[cell].temp=solve_ree(c[cell].abslum,c[cell].mass,0,1111111,mean_op_ptr);
+	}
+  
+#ifdef SPH_TREE
+
+
+  printf("fix temp not good for SpH... solve ree\n"); exit(0);
+
+#endif
+  return;
+}
+
+ 
+

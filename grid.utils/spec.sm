@@ -1,0 +1,41 @@
+
+plot 3         #1.directory name 2. colour 3. photon id 
+ expand 1.001
+
+ define NLBINS 1
+ define NMBINS 1 
+ expand 1.8
+ notation -2 2 -2 2
+ lweight 3 
+#######   spectrum   ###################################
+ TICKSIZE  -1 0 -1 0
+ location  5000 31000 5000 31000 
+ # limits -0.5  3.7 -15 -8 
+
+ limits -2  3.7 -25 -1
+ box
+
+ do i=0,$NLBINS-1 {do j=0,$NMBINS-1 {
+ data $1"/"sed$3.$i.$j.dat
+ lines 2 1001
+ read  lambda   1 
+ read  luml     2
+ read  npackets 3
+
+ ctype $2
+ smooth luml luml2 3 
+ 
+ connect (lg(lambda)) (lg(luml2))
+
+ ctype 0
+ }}
+
+ ctype 0
+
+ xlabel \lambda (\mu m)
+ ylabel \lambda F_{\lambda} (erg s^{-1} cm^{-2})
+ ctype 0
+
+ 
+ 
+ 
