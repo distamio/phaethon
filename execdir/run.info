@@ -291,6 +291,7 @@ endif
 %.o: %.c
 	$(CC) $(OPT) $(GFLAGS) $(SFLAGS) $(OFLAGS) -c $< 
 
+ifeq ($(DUST_MIX),1)
 
 phaethon :: $(OBJ) phaethon.o
 	$(CC) $(OPT) $(GFLAGS) $(SFLAGS) $(OFLAGS) -o phaethon $(OBJ) phaethon.o -lm
@@ -306,7 +307,22 @@ phaethon :: $(OBJ) phaethon.o
 	cp $(OPACITY2_DIR)/opacity.dat $(EXEC_DIR)/opacity2.dat
 	cp $(OPACITY2_DIR)/mopacity.dat $(EXEC_DIR)/mopacity2.dat
 	cp $(OPACITY2_DIR)/ftable.dat $(EXEC_DIR)/ftable2.dat
-
+endif
+	
+ifeq ($(DUST_MIX),0)
+phaethon :: $(OBJ) phaethon.o
+	$(CC) $(OPT) $(GFLAGS) $(SFLAGS) $(OFLAGS) -o phaethon $(OBJ) phaethon.o -lm
+	cp phaethon $(EXEC_DIR)
+	cp $(OPACITY_DIR)/ptable.dat $(EXEC_DIR)
+	cp $(OPACITY_DIR)/opacity.dat $(EXEC_DIR)
+	cp $(OPACITY_DIR)/mopacity.dat $(EXEC_DIR)
+	cp $(OPACITY_DIR)/ftable.dat $(EXEC_DIR)
+	cp $(ISRF_DIR)/isrf.dat $(EXEC_DIR)
+	cat Makefile makefiletail.mk>run.info
+	mv run.info $(EXEC_DIR)
+endif
+	
+	
 mopacity :: $(OBJ_OPA) mopacity.o
 	$(CC) $(OPT) -o mopacity $(OBJ_OPA) mopacity.o -lm
 	mv mopacity $(OPACITY_DIR)
