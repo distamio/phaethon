@@ -7,7 +7,7 @@
 #-----------------------------------------------------------------------------
 # AMBIENT RADIATION FIELD (ISRF) 
 #-----------------------------------------------------------------------------
-0               ISRF      /* 0: no ISRF 1: yes ISRF */
+1               ISRF      /* 0: no ISRF 1: yes ISRF */
 1e6   			ISRF_NPACKETS   
 1               R_ISRF==R_MAX (1=yes 0=no; if no then use next value)
 0            	R_ISRF   /* radius from which photons are emitted isrf */
