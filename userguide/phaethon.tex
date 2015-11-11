@@ -29,30 +29,23 @@
 
 \section{Source code}
 
-The source code can be copied from the directory: 
-\begin{center}
-{\texttt{/home/athena/spxstd/phaethon}}
-\end{center}
+You can download the code by typing in a terminal (git need to be available on your system):
+\vspace{0.5cm}
 
-This folder contains current and previous versions of the code in the format:
-\begin{center}
-\texttt{nphaethon.year.month.day.tar}
-\end{center}
+ \texttt{ git clone https://github.com/distamio/phaethon.git}
+ 
+  \texttt{ cd phaethon}
+\vspace{0.5cm}
 
-Copy the latest version to your space and then
 
- \begin{center}
-\texttt{tar xvf nphaethon.year.month.day.tar}
-\end{center}
-
-This command will create a directory \texttt{nphaethon} , with the following files and subdirectories
+This command will create a directory \texttt{phaethon}, with  the following files and subdirectories (among others)
 
 \vspace{1cm}
 {\centering 
 \begin{tabular}{|p{4cm}|p{13.1cm}|}
 \hline
 \multicolumn{2}{|c|}{}\\ 
-\multicolumn{2}{|c|}{\large\texttt{nphaethon}}\\
+\multicolumn{2}{|c|}{\large\texttt{phaethon}}\\
 \multicolumn{2}{|c|}{}\\  
 \hline
 Name & Description \\
@@ -65,7 +58,7 @@ Name & Description \\
 \texttt{exec}& directory where executables and required files are put\\
 \texttt{grid.spherical}& contains the routines for constructing the grid, and grid related routines, e.g. advance photon, find photon cell, find photon origin, grid density profile \\
 \texttt{isrf}& contains the data for the ambient radiation field \\
-\texttt{opacity.0H5\_0.1\_200}& contains the opacity tables for OH5 opacity. The tables are constucted for temperatures up to 200K, with temperature resolution of 0.1 K\\
+\texttt{opacity.0H5\_0.1\_200}& contains the opacity tables for OH5 (Ossenkopf \& Henning, column 5) opacity. The tables are constucted for temperatures up to 200K, with temperature resolution of 0.1 K. Other opacities are available. Please check as they may not be up-to-date.\\
 \texttt{utils}& various routines for analysing results\\
 \texttt{userguide}& contains the userguide\\
 \hline

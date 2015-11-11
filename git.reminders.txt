@@ -1,0 +1,11 @@
+ After making changes:
+
+ git status
+ git add .
+ git status
+ git commit -a -m "Comment here"
+ git push origin master
+
+ to get changes from the website:
+ 
+ git pull https://github.com/distamio/phaethon.git
