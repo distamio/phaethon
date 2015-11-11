@@ -1,0 +1,253 @@
+# plots opacity vs lambda 
+
+plot_opa_limits3
+
+ limits -1 2.3 -3 1
+
+ TICKSIZE   -1 0 -1 0
+
+ lweight 1
+ expand 1.1
+ location   7000 27000 19000 31000
+ box
+
+
+plot_ptest_limits3
+
+ TICKSIZE  -1 0 0 0 
+ limits -1 2.3 0 1
+
+ lweight 1
+ expand 1.1
+ location  7000 27000 3000 15000
+ box
+
+
+plot_opa_limits2
+
+ limits -1 3 -4 1
+ TICKSIZE   -1 0 -1 0
+
+ lweight 1
+ expand 1.1
+ location  4000 14000 18000 28000
+ box
+
+
+plot_albedo_limits2
+
+ limits -1 3 0 1
+ TICKSIZE   -1 0 0 0
+
+ lweight 1
+ expand 1.1
+ location   20000 30000 18000 28000
+ box
+
+
+plot_ptest_limits2
+
+ TICKSIZE  -1 0 0 0 
+ limits -0.6 2.3 0 1
+
+ lweight 1
+ expand 1.1
+ location  4000 14000 4000 14000
+ box
+
+
+plot_mopa_limits2
+
+ limits  -1 5 -4 1
+ TICKSIZE   -1 0 -1 0
+
+ lweight 1
+ expand 1.1
+ location 20000 30000 4000 14000
+ box
+ 
+
+
+
+plot_opa_limits
+
+ limits 3 4  -7 -3 
+# limits -1 3 -4 1
+ TICKSIZE   -1 0 -1 0
+
+ mr arrange.sm
+ arrange_box
+
+plot_opa
+
+ data opacity.dat
+ lines 1 100001
+
+ read  lambda  1
+ read  absorption 2
+ read  scattering 3
+
+ set albedo=1,98
+ do i=0,97 {set albedo[$i]=scattering[$i]/(absorption[$i]+scattering[$i])}
+
+ # 'convert' lambda to temp
+ # set lambda=(2./3.)*6.6260755e-27*3e10/(1e-4*lambda*1.381e-16)
+ # convert lambda to f 
+ # set lambda=3e10/(1e-4*lambda)
+
+ ltype 0
+ connect (lg(lambda)) (lg(scattering+absorption))
+
+ ltype 1
+ connect (lg(lambda)) (lg(scattering))
+
+ ltype 2
+ connect (lg(lambda)) (lg(absorption))
+
+ ltype 3
+#connect (lg(lambda)) (lg(albedo))
+
+ xlabel  \lambda (\mu m)
+ ylabel Opacity/(\kappa_V+\sigma_V)
+# xlabel T (K)
+
+
+plot_albedo_limits
+
+ limits -1 3 0 1
+ TICKSIZE   -1 0 0 0
+
+ mr arrange.sm
+ arrange_box
+
+plot_albedo
+
+ data opacity.dat
+ lines 1 100001
+
+ read  lambda  1
+ read  absorption 2
+ read  scattering 3
+
+ set albedo=1,98
+ do i=0,97 {set albedo[$i]=scattering[$i]/(absorption[$i]+scattering[$i])}
+
+
+ ltype 0
+ connect (lg(lambda)) albedo
+
+ xlabel  \lambda (\mu m)
+ ylabel albedo 
+
+
+plot_mopa_limits
+
+ limits  -1 5 -4 1
+ TICKSIZE   -1 0 -1 0
+
+ mr arrange.sm
+ arrange_box
+
+plot_mopa
+ expand 1.001
+
+ data mopacity.dat
+ lines 1 10000
+
+ read  temp 1
+ read  mean_opacity 2
+
+
+ ltype 0 
+ connect (lg(temp)) (lg(mean_opacity)) 
+
+ xlabel Temperature (K) 
+ ylabel \kappa_P/(\kappa_V+\sigma_V)
+
+
+plot_ptest_limits
+
+ expand 1.001
+
+ TICKSIZE  -1 0 0 0 
+ limits -0.6 2.3 0 1
+
+ mr arrange.sm  
+ arrange_box 
+
+
+plot_ptest
+
+ define c_CONST 3.e10
+
+ data ptable_test.dat
+ lines 1 3000
+
+
+ read x1     1
+ read x2     3
+ read x3     5
+ read x4     6
+ read x5     7
+ read x6     8
+ read x7     9
+ read x8     10
+ read x9     13
+ read x10    20
+
+ data ftable_test.dat 
+ lines 1 3000
+ read f 1 
+ 
+ set l=1.e4*($c_CONST/f)
+
+ ltype 0
+
+ connect (lg(l))   x1
+ connect (lg(l))   x2 
+ connect (lg(l))   x3  
+ connect (lg(l))   x4 
+ connect (lg(l))   x5 
+ connect (lg(l))   x6
+ connect (lg(l))   x7
+ connect (lg(l))   x8
+ connect (lg(l))   x9
+ connect (lg(l))   x10
+
+
+ expand 0.9
+ xlabel \lambda (\mu m)
+ ylabel Reemission Cumulative Probability 
+ 
+
+ expand 0.8
+
+ relocate 0.2 0.03
+ label 2000K
+
+ relocate 0.45 0.05
+# label 1300K
+
+ relocate 0.64 0.09
+# label 1000K
+
+ relocate 0.7 0.18
+# label 900K
+
+ relocate 0.75 0.25
+# label 800K
+
+ relocate 0.75 0.35
+# label 700K
+
+ relocate 0.75 0.45
+# label 600K
+
+ relocate 0.8 0.6
+# label 500K
+
+ relocate 0.78 0.8
+ label 300K
+
+ relocate 1 0.9
+ label 100K
